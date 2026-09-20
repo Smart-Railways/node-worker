@@ -7,11 +7,12 @@ import {
 } from "indian-rail-mcp";
 
 const app = express();
+const routes = express.Router();
 
 app.use(express.json());
 
 
-app.get("/health", (req, res) => {
+routes.get("/health", (req, res) => {
     res.json({
         success: true,
         service: "indian-rail-data",
@@ -19,7 +20,7 @@ app.get("/health", (req, res) => {
 });
 
 
-app.get("/train/:trainNumber", async (req, res) => {
+routes.get("/train/:trainNumber", async (req, res) => {
     try {
         const { trainNumber } = req.params;
 
@@ -46,7 +47,7 @@ app.get("/train/:trainNumber", async (req, res) => {
     }
 });
 
-app.get("/track/:trainNumber", async (req, res) => {
+routes.get("/track/:trainNumber", async (req, res) => {
     try {
         const date = req.query.date as string | undefined;
 
@@ -68,7 +69,7 @@ app.get("/track/:trainNumber", async (req, res) => {
 });
 
 
-app.get("/trains-between", async (req, res) => {
+routes.get("/trains-between", async (req, res) => {
     try {
         const from = req.query.from as string;
         const to = req.query.to as string;
@@ -91,7 +92,7 @@ app.get("/trains-between", async (req, res) => {
 });
 
 
-app.get("/station/:stationCode", async (req, res) => {
+routes.get("/station/:stationCode", async (req, res) => {
     try {
         const data = await getLiveStation(
             req.params.stationCode
@@ -109,6 +110,10 @@ app.get("/station/:stationCode", async (req, res) => {
     }
 });
 
+// Locally, routes are served from `/`. Vercel invokes serverless functions
+// under `/api`, so support that base path as well.
+app.use(routes);
+app.use("/api", routes);
 
 export default app;
 
