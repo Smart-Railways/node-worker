@@ -136,6 +136,39 @@ app.get("/debug-ntes", async (req, res) => {
     }
 });
 
+routes.get("/debug-ntes", async (_req, res) => {
+    const url = "https://enquiry.indianrail.gov.in/";
+
+    try {
+        const response = await fetch(url, {
+            signal: AbortSignal.timeout(10_000),
+            headers: {
+                "user-agent": "node-railway-debug/1.0",
+            },
+        });
+
+        res.status(response.ok ? 200 : 502).json({
+            success: response.ok,
+            requestedUrl: url,
+            finalUrl: response.url,
+            status: response.status,
+            statusText: response.statusText,
+            contentType: response.headers.get("content-type"),
+            contentLength: response.headers.get("content-length"),
+        });
+    } catch (error) {
+        res.status(502).json({
+            success: false,
+            requestedUrl: url,
+            error: error instanceof Error ? error.message : String(error),
+            name: error instanceof Error ? error.name : null,
+            cause: error instanceof Error && error.cause
+                ? String(error.cause)
+                : null,
+        });
+    }
+});
+
 // Locally, routes are served from `/`. Vercel invokes serverless functions
 // under `/api`, so support that base path as well.
 app.use(routes);
@@ -150,5 +183,4 @@ if (!process.env.VERCEL) {
         console.log("Indian Rail data service running on port 3001");
     });
 }
-
 
