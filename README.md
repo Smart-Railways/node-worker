@@ -45,7 +45,10 @@ npm run typecheck  # Check TypeScript types
 
 ## Deploy to Vercel
 
-The API is configured for Vercel with an `api/index.ts` serverless entry point. The `vercel.json` rewrite sends every request to the Express app.
+The API is configured for Vercel with a catch-all Node.js function at
+`api/[...path].ts`. The `vercel.json` rewrite forwards every public request to
+that function while preserving its path, so the routes below work at the root
+of your Vercel domain.
 
 1. Push this repository to GitHub.
 2. Import the repository in Vercel.
